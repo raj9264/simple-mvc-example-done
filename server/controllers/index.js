@@ -193,6 +193,7 @@ const createDog = async (req, res) => {
     return res.status(400).json({ error: 'Name, breed and age are all required' });
   }
 
+  // Create a new dog using the information from the form.
   const dogData = {
     name: req.body.name,
     breed: req.body.breed,
@@ -215,40 +216,6 @@ const createDog = async (req, res) => {
     return res.status(500).json({ error: 'Failed to create dog' });
   }
 };
-
-
-// Function that  finds a dog by name, and increase the dogs age
-const increaseDogAge = async (req, res) => {
-  // Check that a name was provided.
-  if (!req.body.name) {
-    return res.status(400).json({ error: 'Dog name is required' });
-  }
-
-  try {
-    // Find dog by name,increase age by 1
-    const doc = await Dog.findOneAndUpdate(
-      { name: req.body.name },
-      { $inc: { age: 1 } },
-      { returnDocument: 'after' }
-    ).lean().exec();
-
-    // return error if the dog doesn't exist
-    if (!doc) {
-      return res.status(404).json({ error: 'Dog not found' });
-    }
-
-    // Updated dogs information
-    return res.json({
-      name: doc.name,
-      breed: doc.breed,
-      age: doc.age,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ error: 'Something went wrong' });
-  }
-};
-
 
 
 // Function to handle searching a cat by name.
