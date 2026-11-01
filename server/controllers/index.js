@@ -193,7 +193,6 @@ const createDog = async (req, res) => {
     return res.status(400).json({ error: 'Name, breed and age are all required' });
   }
 
-  // Create a new dog using the information from the form.
   const dogData = {
     name: req.body.name,
     breed: req.body.breed,
@@ -203,7 +202,7 @@ const createDog = async (req, res) => {
   const newDog = new Dog(dogData);
 
   try {
-    // Save the new dog to the database.
+    // Save new dog to database
     await newDog.save();
 
     return res.status(201).json({
@@ -216,6 +215,54 @@ const createDog = async (req, res) => {
     return res.status(500).json({ error: 'Failed to create dog' });
   }
 };
+
+
+// Function to find a dog by name and increase its age
+const increaseDogAge = async (req, res) => {
+  // Check that a name was provided.
+  if (!req.body.name) {
+    return res.status(400).json({ error: 'Dog name is required' });
+  }
+
+  try {
+    // Find dog by name and increase age by 1
+    const doc = await Dog.findOneAndUpdate(
+      { name: req.body.name },
+      { $inc: { age: 1 } },
+      { returnDocument: 'after' }
+    ).lean().exec();
+
+    // return an error if the dog does not exist
+    if (!doc) {
+      return res.status(404).json({ error: 'Dog not found' });
+    }
+
+    return res.json({
+      name: doc.name,
+      breed: doc.breed,
+      age: doc.age,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+};
+
+
+// Function to retrieve all dogs from database
+const getAllDogs = async (req, res) => {
+  try {
+    // Find all dogs in database
+    const docs = await Dog.find({}).lean().exec();
+
+    return res.render('page4', { dogs: docs });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Failed to find dogs' });
+  }
+};
+
+
 
 
 // Function to handle searching a cat by name.
@@ -326,5 +373,8 @@ module.exports = {
   setName,
   updateLast,
   searchName,
+  createDog,
+  increaseDogAge,
+  getAllDogs,
   notFound,
 };
